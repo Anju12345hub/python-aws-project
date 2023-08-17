@@ -1,0 +1,57 @@
+
+
+1)Create Lambda Function:
+
+  -Start by creating a new Lambda function named "ebs_volume_check" with a runtime of Python 3.10.
+2)Create CloudWatch Rule:
+
+  -Go to AWS CloudWatch Events and navigate to "Rules".
+  -Click on "Create rule".
+  -For the service name, choose "EC2".
+  -Select the event type as "EBS volume notification".
+  -Add the Lambda function "ebs_volume_check" as the target group.
+  -Configure details for the rule:
+     Name: Set it as "ebs_volume_check".
+     Description: Provide a brief project description.
+  -Create the rule.
+3)Lambda Function Code:
+
+import boto3
+def get_volume_id_from_arn(volume_arn):
+    #split ARN using colon(':')separator
+	arn_parts = volume_arn.split(':')
+	#volume id is last part of ARN after the volume'/' prefix
+	volume_id = arn_parts[-1].split('/').[-1]
+	return volume_id
+	
+def lambda_handler(event ,context):
+    volume_arn = event['resources'][0]
+	volume_id = get_volume_id_from_arn(volume_arn)
+	
+	
+	ec2_client = boto3.client('ec2')
+	response = ec2_client.modify_volume{
+	   VolumeId=volume_id,
+	   VolumeType='gp3'
+	)
+	
+	
+4)Test and Deploy Lambda Function:
+
+  -Test the Lambda function to ensure it works as expected.
+  -Deploy the Lambda function to make it ready for use.
+5)Add Permissions to IAM Role:
+
+  -Go to IAM Role associated with the Lambda function.
+  -Add necessary permissions by creating an inline policy.
+  -For the service, select "EC2".
+  -Allow the following actions:
+     "DescribeVolume"
+     "ModifyVolume"
+  -Name the policy as "ebs_volume_check".
+6)Create and Observe EBS Volume:
+
+  -Create an EBS volume with "gp2" type.
+  -Once the volume is created, wait for a moment and refresh the view.
+  -You will observe that the EBS volume is automatically modified to "gp3" type, demonstrating the functionality of your project.
+This project showcases the automation of EBS volume management using AWS Lambda and CloudWatch Events.
